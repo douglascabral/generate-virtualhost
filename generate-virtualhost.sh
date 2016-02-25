@@ -13,30 +13,30 @@ while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 
 echo
 echo "Informe o nome do server (Ex: meusite.com.br ou test.local)"
-read SERVER
+read MYSERVER
 
 echo
 echo "Informe o caminho dos arquivos (Ex: /var/www/meusite.com.br ou /var/www/test.local)"
-read PATH
+read MYPATH
 
-sudo mkdir -p "$PATH"
-sudo chown -R "$USER:$USER $PATH"
+sudo mkdir -p "$MYPATH"
+sudo chown -R "$USER:$USER $MYPATH"
 
 #permissão para o diretório web
-sudo chmod -R 755 "$PATH"
+sudo chmod -R 755 "$MYPATH"
 
 #cria um arquivo index
-touch "$PATH/index.php"
+touch "$MYPATH/index.php"
 
 #phpinfo
-echo '<?php phpinfo();' > "$PATH/index.php"
+echo '<?php phpinfo();' > "$MYPATH/index.php"
 
 #cria o virtualhost
-echo "Criando virtualhost para $SERVER"
-sudo cp /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-available/$SERVER.conf
+echo "Criando virtualhost para $MYSERVER"
+sudo cp /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-available/$MYSERVER.conf
 
 echo "
-<Directory $PATH>
+<Directory $MYPATH>
 	Options Indexes FollowSymLinks MultiViews
 	AllowOverride All
 	Order allow,deny
@@ -44,17 +44,17 @@ echo "
 </Directory>
 <VirtualHost *:80>
 	ServerAdmin webmaster@localhost
-	ServerName $SERVER
-	ServerAlias www.$SERVER
-	DocumentRoot $PATH
+	ServerName $MYSERVER
+	ServerAlias www.$MYSERVER
+	DocumentRoot $MYPATH
 	ErrorLog ${APACHE_LOG_DIR}/error.log
 	CustomLog ${APACHE_LOG_DIR}/access.log combined
 </VirtualHost>
-" | sudo tee /etc/apache2/sites-available/$SERVER.conf
+" | sudo tee /etc/apache2/sites-available/$MYSERVER.conf
 
 #Ativa os novos arquivos de virtual host
 echo "Ativando virtual host de test.local"
-sudo a2ensite $SERVER.conf
+sudo a2ensite $MYSERVER.conf
 
 #restart o apache novamente
 echo "Reiniciando apache2"
@@ -62,4 +62,4 @@ sudo service apache2 restart
 
 #Atualiza o arquivo hosts
 echo "Atualizando arquivo hosts"
-echo "127.0.1.1   $SERVER www.$SERVER" | sudo tee --append /etc/hosts
+echo "127.0.1.1   $MYSERVER www.$MYSERVER" | sudo tee --append /etc/hosts
